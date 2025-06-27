@@ -3,234 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Appointment Manager</title>
-    
-    <!-- PWA Meta Tags -->
-    <meta name="description" content="Customer and Appointment Management App">
     <meta name="theme-color" content="#21808D">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Appointments">
+    <meta name="apple-mobile-web-app-title" content="Appointment Manager">
+    <meta name="description" content="Customer and Appointment Management Progressive Web App">
     
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiQXBwb2ludG1lbnQgTWFuYWdlciIsInNob3J0X25hbWUiOiJBcHBvaW50bWVudHMiLCJkZXNjcmlwdGlvbiI6IkN1c3RvbWVyIGFuZCBBcHBvaW50bWVudCBNYW5hZ2VtZW50IEFwcCIsInN0YXJ0X3VybCI6Ii8iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjRkNGQ0Y5IiwidGhlbWVfY29sb3IiOiIjMjE4MDhEIiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QjNhV1IwYUQwaU1Ua3lJaUJvWldsbmFIUTlJakU1TWlJZ2RtbGxkMEp2ZUQwaU1DQXdJREU1TWlBeE9USWlJR1pwYkd3OUlpTXlNVGd3T0VRaUlIaHRiRzV6UFNKb2RIUndPaTh2ZDNkM0xuY3pMbTl5Wnk4eU1EQXdMM04yWnlJK1BISmxZM1FnZUQwaU5EZ2lJSGs5SWpRNElpQjNhV1IwYUQwaU9UWWlJR2hsYVdkb2REMGlPVFlpSUhKNFBTSTRJaUJtYVd4c1BTSWpabVptSWk4K1BIUmxlSFFnZUQwaU9UWWlJSGs5SWpZMElpQm1hV3hzUFNJall6QXpNakVpSUdadmJuUXRjMmw2WlQwaU1qQWlJR1p2Ym5RdGQyVnBaMmgwUFNKaWIyeGtJaUIwWlhoMExXRnVZMmh2Y2owaWJXbGtaR3hsWG1acGJHeFlJajVCVURBOEwzUmxlSFErUEM5emRtYysiLCJzaXplcyI6IjE5MngxOTIiLCJ0eXBlIjoiaW1hZ2Uvc3ZnK3htbCJ9LHsic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCM2FXUjBhRDBpTlRFeUlpQm9aV2xuYUhROU5URXlJaUIyYVdWM1FtOTRQU0l3SURBZ05URXlJRFV4TWlJZ1ptbHNiRDBpSXpJeE9EQTRSQ0lnZUcxc2JuTTlJbWgwZEhBNkx5OTNkM2N1ZHpNdWIzSm5Mekl3TURBM2MzWm5JajQ4Y21WamRDQjRQU0l4TWpnaUlIazlJakV5T0NJZ2QybGtkR2c5SWpJMU5pSWdhR1ZwWjJoMFBTSXlOVFlpSUhKNFBTSXhOQ0lnWm1sc2JEMGlJMlptWmlJdlBqeDBlSGRjZUQwaU1qVTJJaUI1UFNJeE56WWlJR1pwYkd3OUlpTmpNRE15TVNJZ1ptOXVkQzF6YVhwbFBTSTFNQ0lnWm05dWRDMTNaV2xuYUhROU5tSnZiR1FpSUhSbGVIUXRZVzVqYUc5eVBTSnRhV1JrYkdWOVptbHNiRmdpUGtGUVVEQThMM1JsZUhRK1BDOW5QZz09IiwidHlwZSI6ImltYWdlL3N2Zyt4bWwiLCJzaXplcyI6IjUxMng1MTIifV19">
-    
-    <!-- iOS Icons -->
-    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9IiMyMTgwOEQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3QgeD0iNDgiIHk9IjQ4IiB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHJ4PSI4IiBmaWxsPSIjZmZmIi8+PHRleHQgeD0iOTYiIHk9IjY0IiBmaWxsPSIjYzAzMjEiIGZvbnQtc2l6ZT0iMjAiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlfGZpbGxYIj5BUEE8L3RleHQ+PC9zdmc+">
+    <title>Appointment Manager</title>
     
     <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQXBwb2ludG1lbnQgTWFuYWdlciBQV0EiLCJzaG9ydF9uYW1lIjoiQXBwb2ludG1lbnRNZ3IiLCJkZXNjcmlwdGlvbiI6IkN1c3RvbWVyIGFuZCBBcHBvaW50bWVudCBNYW5hZ2VtZW50IFByb2dyZXNzaXZlIFdlYiBBcHAiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2ZmZmZmZiIsInRoZW1lX2NvbG9yIjoiIzIxODA4RCIsIm9yaWVudGF0aW9uIjoicG9ydHJhaXQiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sLDxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB3aWR0aD0nMTkyJyBoZWlnaHQ9JzE5Micgdmlld0JveD0nMCAwIDI0IDI0JyBmaWxsPSclMjMyMTk2RjMnPjxwYXRoIGQ9J00xOSAzaC0xVjFoLTJ2Mkg4VjFINnYySDVjLTEuMTEgMC0xLjk5LjktMS45OSAyTDMgMTljMCAxLjEuODkgMiAyIDJoMTRjMS4xIDAgMi0uOSAyLTJWNWMwLTEuMS0uOS0yLTItMnptMCAxNkg1VjhoMTR2MTF6TTcgMTBoNXY1SDd6Jy8+PC9zdmc+Iiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifSx7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCw8c3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgd2lkdGg9JzUxMicgaGVpZ2h0PSc1MTInIHZpZXdCb3g9JzAgMCAyNCAyNCcgZmlsbD0nJTIzMjE5NkYzJz48cGF0aCBkPSdNMTkgM2gtMVYxaC0ydjJIOFYxSDZ2Mkg1Yy0xLjExIDAtMS45OS45LTEuOTkgMkwzIDE5YzAgMS4xLjg5IDIgMiAyaDE0YzEuMSAwIDItLjkgMi0yVjVjMC0xLjEtLjktMi0yLTJ6bTAgMTZINVY4aDE0djExek03IDEwaDV2NUg3eicvPjwvc3ZnPiIsInNpemVzIjoiNTEyeDUxMiIsInR5cGUiOiJpbWFnZS9zdmcreG1sIn1dfQ==">
+    
+    <!-- iPhone-specific meta tags -->
+    <meta name="format-detection" content="telephone=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='%2321808D'><path d='M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z'/></svg>">
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="loading-screen">
-        <div class="loading-content">
-            <div class="loading-icon">📅</div>
-            <h1 id="loading-title">Appointment Manager</h1>
-            <div class="loading-spinner"></div>
-        </div>
-    </div>
-
-    <!-- Main App -->
-    <div id="app" class="app hidden">
+    <div class="app-container">
         <!-- Header -->
         <header class="app-header">
-            <h1 id="page-title">Dashboard</h1>
-            <button id="search-btn" class="btn btn--secondary btn--sm search-btn">🔍</button>
+            <h1 class="app-title" data-i18n="appTitle">Appointment Manager</h1>
+            <div class="header-actions">
+                <button class="btn btn--secondary btn--sm theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
         </header>
 
-        <!-- Search Bar -->
-        <div id="search-bar" class="search-bar hidden">
-            <input type="text" id="search-input" class="form-control" placeholder="Search...">
-            <button id="search-close" class="btn btn--secondary btn--sm">✕</button>
-        </div>
-
         <!-- Main Content -->
-        <main id="main-content" class="main-content">
-            <!-- Dashboard -->
-            <section id="dashboard-section" class="section active">
-                <div class="stats-grid">
-                    <div class="stat-card card">
-                        <div class="card__body">
-                            <div class="stat-number" id="total-customers">0</div>
-                            <div class="stat-label" data-i18n="totalCustomers">Total Customers</div>
-                        </div>
-                    </div>
-                    <div class="stat-card card">
-                        <div class="card__body">
-                            <div class="stat-number" id="today-appointments">0</div>
+        <main class="app-main" id="mainContent">
+            <!-- Dashboard View -->
+            <div class="view dashboard-view active" id="dashboardView">
+                <div class="view-header">
+                    <h2 data-i18n="dashboard">Dashboard</h2>
+                </div>
+                <div class="dashboard-content">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="todayCount">0</div>
                             <div class="stat-label" data-i18n="todayAppointments">Today's Appointments</div>
                         </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="upcomingCount">0</div>
+                            <div class="stat-label" data-i18n="upcomingAppointments">Upcoming Appointments</div>
+                        </div>
+                    </div>
+                    <div class="today-appointments" id="todayAppointments">
+                        <!-- Today's appointments will be populated here -->
                     </div>
                 </div>
-                
-                <div class="section-header">
-                    <h2 data-i18n="recentAppointments">Recent Appointments</h2>
-                </div>
-                <div id="recent-appointments" class="appointments-list"></div>
-            </section>
+            </div>
 
-            <!-- Customers -->
-            <section id="customers-section" class="section">
-                <div class="section-actions">
-                    <button id="add-customer-btn" class="btn btn--primary">
+            <!-- Customers View -->
+            <div class="view customers-view" id="customersView">
+                <div class="view-header">
+                    <h2 data-i18n="customers">Customers</h2>
+                    <button class="btn btn--primary btn--sm" id="addCustomerBtn">
                         <span data-i18n="addCustomer">Add Customer</span>
                     </button>
                 </div>
-                <div id="customers-list" class="customers-list"></div>
-            </section>
+                <div class="search-container">
+                    <input type="text" class="form-control search-input" id="customerSearch" data-i18n-placeholder="search" placeholder="Search">
+                </div>
+                <div class="customers-list" id="customersList">
+                    <!-- Customers will be populated here -->
+                </div>
+            </div>
 
-            <!-- Appointments -->
-            <section id="appointments-section" class="section">
-                <div class="section-actions">
-                    <button id="add-appointment-btn" class="btn btn--primary">
+            <!-- Appointments View -->
+            <div class="view appointments-view" id="appointmentsView">
+                <div class="view-header">
+                    <h2 data-i18n="appointments">Appointments</h2>
+                    <button class="btn btn--primary btn--sm" id="addAppointmentBtn">
                         <span data-i18n="addAppointment">Add Appointment</span>
                     </button>
                 </div>
-                <div id="appointments-list" class="appointments-list"></div>
-            </section>
+                <div class="appointments-list" id="appointmentsList">
+                    <!-- Appointments will be populated here -->
+                </div>
+            </div>
 
-            <!-- Settings -->
-            <section id="settings-section" class="section">
-                <div class="settings-group">
-                    <div class="form-group">
+            <!-- Settings View -->
+            <div class="view settings-view" id="settingsView">
+                <div class="view-header">
+                    <h2 data-i18n="settings">Settings</h2>
+                </div>
+                <div class="settings-content">
+                    <div class="setting-group">
                         <label class="form-label" data-i18n="language">Language</label>
-                        <select id="language-select" class="form-control">
+                        <select class="form-control" id="languageSelect">
                             <option value="en">English</option>
                             <option value="el">Ελληνικά</option>
                         </select>
                     </div>
-                    <div class="form-group">
+                    <div class="setting-group">
                         <label class="form-label" data-i18n="theme">Theme</label>
-                        <select id="theme-select" class="form-control">
-                            <option value="auto">Auto</option>
+                        <select class="form-control" id="themeSelect">
                             <option value="light" data-i18n="light">Light</option>
                             <option value="dark" data-i18n="dark">Dark</option>
                         </select>
                     </div>
+                    <div class="setting-group">
+                        <label class="form-label" data-i18n="notifications">Notifications</label>
+                        <button class="btn btn--outline" id="notificationToggle">
+                            <span data-i18n="disabled">Disabled</span>
+                        </button>
+                    </div>
                 </div>
-            </section>
+            </div>
         </main>
 
         <!-- Bottom Navigation -->
         <nav class="bottom-nav">
-            <button class="nav-item active" data-section="dashboard">
+            <button class="nav-item active" data-view="dashboard">
                 <span class="nav-icon">📊</span>
                 <span class="nav-label" data-i18n="dashboard">Dashboard</span>
             </button>
-            <button class="nav-item" data-section="customers">
+            <button class="nav-item" data-view="customers">
                 <span class="nav-icon">👥</span>
                 <span class="nav-label" data-i18n="customers">Customers</span>
             </button>
-            <button class="nav-item" data-section="appointments">
+            <button class="nav-item" data-view="appointments">
                 <span class="nav-icon">📅</span>
                 <span class="nav-label" data-i18n="appointments">Appointments</span>
             </button>
-            <button class="nav-item" data-section="settings">
+            <button class="nav-item" data-view="settings">
                 <span class="nav-icon">⚙️</span>
                 <span class="nav-label" data-i18n="settings">Settings</span>
             </button>
         </nav>
     </div>
 
+    <!-- Modals -->
     <!-- Customer Modal -->
-    <div id="customer-modal" class="modal">
+    <div class="modal" id="customerModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="customer-modal-title" data-i18n="addCustomer">Add Customer</h3>
-                <button class="modal-close">✕</button>
+                <h3 id="customerModalTitle" data-i18n="addCustomer">Add Customer</h3>
+                <button class="modal-close" id="closeCustomerModal">&times;</button>
             </div>
-            <form id="customer-form" class="modal-body">
+            <form class="modal-body" id="customerForm">
                 <div class="form-group">
-                    <label class="form-label">
-                        <span data-i18n="name">Name</span>
-                        <span class="required">*</span>
-                    </label>
-                    <input type="text" id="customer-name" class="form-control" required>
+                    <label class="form-label" data-i18n="customerName">Customer Name</label>
+                    <input type="text" class="form-control" id="customerName" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">
-                        <span data-i18n="phone">Phone</span>
-                        <span class="required">*</span>
-                    </label>
-                    <input type="tel" id="customer-phone" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" data-i18n="email">Email</label>
-                    <input type="email" id="customer-email" class="form-control">
+                    <label class="form-label" data-i18n="phoneNumber">Phone Number</label>
+                    <input type="tel" class="form-control" id="customerPhone" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label" data-i18n="notes">Notes</label>
-                    <textarea id="customer-notes" class="form-control" rows="3"></textarea>
+                    <textarea class="form-control" id="customerNotes" rows="3"></textarea>
                 </div>
             </form>
             <div class="modal-footer">
-                <button type="button" class="btn btn--secondary modal-cancel" data-i18n="cancel">Cancel</button>
-                <button type="submit" form="customer-form" class="btn btn--primary" data-i18n="save">Save</button>
+                <button type="button" class="btn btn--secondary" id="cancelCustomer" data-i18n="cancel">Cancel</button>
+                <button type="submit" class="btn btn--primary" id="saveCustomer" data-i18n="save">Save</button>
             </div>
         </div>
     </div>
 
     <!-- Appointment Modal -->
-    <div id="appointment-modal" class="modal">
+    <div class="modal" id="appointmentModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="appointment-modal-title" data-i18n="addAppointment">Add Appointment</h3>
-                <button class="modal-close">✕</button>
+                <h3 id="appointmentModalTitle" data-i18n="addAppointment">Add Appointment</h3>
+                <button class="modal-close" id="closeAppointmentModal">&times;</button>
             </div>
-            <form id="appointment-form" class="modal-body">
+            <form class="modal-body" id="appointmentForm">
                 <div class="form-group">
-                    <label class="form-label">
-                        <span data-i18n="customers">Customer</span>
-                        <span class="required">*</span>
-                    </label>
-                    <select id="appointment-customer" class="form-control" required>
-                        <option value="">Select customer...</option>
+                    <label class="form-label" data-i18n="customers">Customer</label>
+                    <select class="form-control" id="appointmentCustomer" required>
+                        <option value="">Select a customer...</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">
-                        <span data-i18n="date">Date</span>
-                        <span class="required">*</span>
-                    </label>
-                    <input type="date" id="appointment-date" class="form-control" required>
+                    <label class="form-label" data-i18n="service">Service</label>
+                    <input type="text" class="form-control" id="appointmentService" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">
-                        <span data-i18n="time">Time</span>
-                        <span class="required">*</span>
-                    </label>
-                    <input type="time" id="appointment-time" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">
-                        <span data-i18n="service">Service</span>
-                        <span class="required">*</span>
-                    </label>
-                    <select id="appointment-service" class="form-control" required>
-                        <option value="">Select service...</option>
-                        <option value="Consultation">Consultation</option>
-                        <option value="Follow-up">Follow-up</option>
-                        <option value="Treatment">Treatment</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" data-i18n="status">Status</label>
-                    <select id="appointment-status" class="form-control">
-                        <option value="Scheduled">Scheduled</option>
-                        <option value="Confirmed">Confirmed</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Cancelled">Cancelled</option>
-                    </select>
+                    <label class="form-label" data-i18n="dateTime">Date & Time</label>
+                    <input type="datetime-local" class="form-control" id="appointmentDateTime" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label" data-i18n="notes">Notes</label>
-                    <textarea id="appointment-notes" class="form-control" rows="3"></textarea>
+                    <textarea class="form-control" id="appointmentNotes" rows="3"></textarea>
                 </div>
             </form>
             <div class="modal-footer">
-                <button type="button" class="btn btn--secondary modal-cancel" data-i18n="cancel">Cancel</button>
-                <button type="submit" form="appointment-form" class="btn btn--primary" data-i18n="save">Save</button>
+                <button type="button" class="btn btn--secondary" id="cancelAppointment" data-i18n="cancel">Cancel</button>
+                <button type="submit" class="btn btn--primary" id="saveAppointment" data-i18n="save">Save</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Notification Permission Toast -->
+    <div class="toast" id="notificationToast">
+        <div class="toast-content">
+            <span class="toast-message">Notifications enabled successfully!</span>
+        </div>
+    </div>
+
+    <!-- PWA Install Prompt -->
+    <div class="install-prompt hidden" id="installPrompt">
+        <div class="install-content">
+            <span class="install-text">Install this app on your device for the best experience</span>
+            <button class="btn btn--primary btn--sm" id="installBtn">Install</button>
+            <button class="install-close" id="dismissInstall">&times;</button>
         </div>
     </div>
 

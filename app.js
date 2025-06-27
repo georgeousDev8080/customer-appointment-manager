@@ -1,878 +1,848 @@
-// PWA Service Worker Registration
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        const swCode = `
-            const CACHE_NAME = 'appointment-manager-v1';
-            const urlsToCache = [
-                '/',
-                '/style.css',
-                '/app.js'
-            ];
+// Translation data
+const translations = {
+  "en": {
+    "appTitle": "Appointment Manager",
+    "dashboard": "Dashboard",
+    "customers": "Customers",
+    "appointments": "Appointments",
+    "settings": "Settings",
+    "addCustomer": "Add Customer",
+    "addAppointment": "Add Appointment",
+    "customerName": "Customer Name",
+    "phoneNumber": "Phone Number",
+    "notes": "Notes",
+    "service": "Service",
+    "dateTime": "Date & Time",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search",
+    "noCustomers": "No customers found",
+    "noAppointments": "No appointments found",
+    "todayAppointments": "Today's Appointments",
+    "upcomingAppointments": "Upcoming Appointments",
+    "language": "Language",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "notifications": "Notifications",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "appointmentReminder": "Appointment Reminder",
+    "appointmentIn30": "You have an appointment in 30 minutes"
+  },
+  "el": {
+    "appTitle": "Διαχείριση Ραντεβού",
+    "dashboard": "Πίνακας Ελέγχου",
+    "customers": "Πελάτες",
+    "appointments": "Ραντεβού",
+    "settings": "Ρυθμίσεις",
+    "addCustomer": "Προσθήκη Πελάτη",
+    "addAppointment": "Προσθήκη Ραντεβού",
+    "customerName": "Όνομα Πελάτη",
+    "phoneNumber": "Τηλέφωνο",
+    "notes": "Σημειώσεις",
+    "service": "Υπηρεσία",
+    "dateTime": "Ημερομηνία & Ώρα",
+    "save": "Αποθήκευση",
+    "cancel": "Ακύρωση",
+    "edit": "Επεξεργασία",
+    "delete": "Διαγραφή",
+    "search": "Αναζήτηση",
+    "noCustomers": "Δεν βρέθηκαν πελάτες",
+    "noAppointments": "Δεν βρέθηκαν ραντεβού",
+    "todayAppointments": "Σημερινά Ραντεβού",
+    "upcomingAppointments": "Επερχόμενα Ραντεβού",
+    "language": "Γλώσσα",
+    "theme": "Θέμα",
+    "light": "Φωτεινό",
+    "dark": "Σκοτεινό",
+    "notifications": "Ειδοποιήσεις",
+    "enabled": "Ενεργοποιημένο",
+    "disabled": "Απενεργοποιημένο",
+    "appointmentReminder": "Υπενθύμιση Ραντεβού",
+    "appointmentIn30": "Έχετε ραντεβού σε 30 λεπτά"
+  }
+};
 
-            self.addEventListener('install', event => {
-                event.waitUntil(
-                    caches.open(CACHE_NAME)
-                        .then(cache => cache.addAll(urlsToCache))
-                );
-            });
+// Application state
+class AppState {
+  constructor() {
+    this.customers = JSON.parse(localStorage.getItem('customers')) || [];
+    this.appointments = JSON.parse(localStorage.getItem('appointments')) || [];
+    this.settings = JSON.parse(localStorage.getItem('settings')) || {
+      language: 'en',
+      theme: 'light',
+      notifications: false
+    };
+    this.currentView = 'dashboard';
+    this.editingCustomer = null;
+    this.editingAppointment = null;
+    this.notificationPermission = false;
+    this.deferredPrompt = null;
+  }
 
-            self.addEventListener('fetch', event => {
-                event.respondWith(
-                    caches.match(event.request)
-                        .then(response => {
-                            if (response) {
-                                return response;
-                            }
-                            return fetch(event.request);
-                        }
-                    )
-                );
-            });
-        `;
-        
-        const blob = new Blob([swCode], { type: 'application/javascript' });
-        const swUrl = URL.createObjectURL(blob);
-        
-        navigator.serviceWorker.register(swUrl)
-            .then(registration => {
-                console.log('ServiceWorker registration successful');
-            })
-            .catch(err => {
-                console.log('ServiceWorker registration failed');
-            });
+  saveCustomers() {
+    localStorage.setItem('customers', JSON.stringify(this.customers));
+  }
+
+  saveAppointments() {
+    localStorage.setItem('appointments', JSON.stringify(this.appointments));
+  }
+
+  saveSettings() {
+    localStorage.setItem('settings', JSON.stringify(this.settings));
+  }
+
+  addCustomer(customer) {
+    customer.id = Date.now().toString();
+    customer.createdAt = new Date().toISOString();
+    this.customers.push(customer);
+    this.saveCustomers();
+  }
+
+  updateCustomer(id, customer) {
+    const index = this.customers.findIndex(c => c.id === id);
+    if (index !== -1) {
+      this.customers[index] = { ...this.customers[index], ...customer };
+      this.saveCustomers();
+    }
+  }
+
+  deleteCustomer(id) {
+    this.customers = this.customers.filter(c => c.id !== id);
+    // Also delete appointments for this customer
+    this.appointments = this.appointments.filter(a => a.customerId !== id);
+    this.saveCustomers();
+    this.saveAppointments();
+  }
+
+  addAppointment(appointment) {
+    appointment.id = Date.now().toString();
+    appointment.createdAt = new Date().toISOString();
+    appointment.notificationScheduled = false;
+    this.appointments.push(appointment);
+    this.saveAppointments();
+    this.scheduleNotification(appointment);
+  }
+
+  updateAppointment(id, appointment) {
+    const index = this.appointments.findIndex(a => a.id === id);
+    if (index !== -1) {
+      this.appointments[index] = { ...this.appointments[index], ...appointment };
+      this.saveAppointments();
+      this.scheduleNotification(this.appointments[index]);
+    }
+  }
+
+  deleteAppointment(id) {
+    this.appointments = this.appointments.filter(a => a.id !== id);
+    this.saveAppointments();
+  }
+
+  scheduleNotification(appointment) {
+    if (!this.settings.notifications) return;
+
+    const appointmentTime = new Date(appointment.dateTime);
+    const notificationTime = new Date(appointmentTime.getTime() - 30 * 60 * 1000); // 30 minutes before
+    const now = new Date();
+
+    if (notificationTime > now) {
+      const timeUntilNotification = notificationTime.getTime() - now.getTime();
+      setTimeout(() => {
+        this.showNotification(appointment);
+      }, timeUntilNotification);
+    }
+  }
+
+  showNotification(appointment) {
+    if (Notification.permission === 'granted') {
+      const customer = this.customers.find(c => c.id === appointment.customerId);
+      const customerName = customer ? customer.name : 'Unknown';
+      
+      new Notification(translations[this.settings.language].appointmentReminder, {
+        body: `${customerName} - ${appointment.service}\n${translations[this.settings.language].appointmentIn30}`,
+        icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='192' height='192' viewBox='0 0 24 24' fill='%2321808D'><path d='M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z'/></svg>",
+        tag: `appointment-${appointment.id}`
+      });
+    }
+  }
+}
+
+// Global app state
+const app = new AppState();
+
+// Haptic feedback simulation
+function hapticFeedback(element) {
+  if (element) {
+    element.classList.add('haptic-feedback');
+    setTimeout(() => {
+      element.classList.remove('haptic-feedback');
+    }, 150);
+  }
+}
+
+// Language and theme management
+function updateLanguage() {
+  document.documentElement.lang = app.settings.language;
+  document.querySelectorAll('[data-i18n]').forEach(element => {
+    const key = element.getAttribute('data-i18n');
+    if (translations[app.settings.language][key]) {
+      element.textContent = translations[app.settings.language][key];
+    }
+  });
+
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+    const key = element.getAttribute('data-i18n-placeholder');
+    if (translations[app.settings.language][key]) {
+      element.placeholder = translations[app.settings.language][key];
+    }
+  });
+}
+
+function updateTheme() {
+  // Apply theme to document root
+  document.documentElement.setAttribute('data-color-scheme', app.settings.theme);
+  
+  // Update theme icon
+  const themeIcon = document.querySelector('.theme-icon');
+  if (themeIcon) {
+    themeIcon.textContent = app.settings.theme === 'light' ? '🌙' : '☀️';
+  }
+  
+  // Update theme select in settings
+  const themeSelect = document.getElementById('themeSelect');
+  if (themeSelect) {
+    themeSelect.value = app.settings.theme;
+  }
+  
+  // Force a repaint to ensure theme changes are visible
+  document.body.style.display = 'none';
+  document.body.offsetHeight;
+  document.body.style.display = '';
+}
+
+// Navigation with improved responsiveness
+function showView(viewName) {
+  // Prevent multiple rapid clicks
+  if (app.isNavigating) return;
+  app.isNavigating = true;
+  
+  setTimeout(() => {
+    app.isNavigating = false;
+  }, 300);
+
+  // Hide all views
+  document.querySelectorAll('.view').forEach(view => {
+    view.classList.remove('active');
+  });
+
+  // Show selected view
+  const targetView = document.getElementById(`${viewName}View`);
+  if (targetView) {
+    targetView.classList.add('active');
+  }
+
+  // Update navigation with immediate feedback
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.remove('active');
+  });
+  const activeNavItem = document.querySelector(`[data-view="${viewName}"]`);
+  if (activeNavItem) {
+    activeNavItem.classList.add('active');
+  }
+
+  app.currentView = viewName;
+
+  // Load data for the view
+  setTimeout(() => {
+    switch (viewName) {
+      case 'dashboard':
+        loadDashboard();
+        break;
+      case 'customers':
+        loadCustomers();
+        break;
+      case 'appointments':
+        loadAppointments();
+        break;
+      case 'settings':
+        loadSettings();
+        break;
+    }
+  }, 50);
+}
+
+// Dashboard functions
+function loadDashboard() {
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  
+  const todayAppointments = app.appointments.filter(apt => {
+    const aptDate = new Date(apt.dateTime).toISOString().split('T')[0];
+    return aptDate === todayStr;
+  });
+
+  const upcomingAppointments = app.appointments.filter(apt => {
+    const aptDate = new Date(apt.dateTime);
+    return aptDate > today;
+  });
+
+  document.getElementById('todayCount').textContent = todayAppointments.length;
+  document.getElementById('upcomingCount').textContent = upcomingAppointments.length;
+
+  const todayContainer = document.getElementById('todayAppointments');
+  if (todayAppointments.length === 0) {
+    todayContainer.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">📅</div>
+        <div class="empty-state-text">${translations[app.settings.language].noAppointments}</div>
+      </div>
+    `;
+  } else {
+    todayContainer.innerHTML = todayAppointments
+      .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime))
+      .map(apt => createAppointmentCard(apt))
+      .join('');
+  }
+}
+
+function createAppointmentCard(appointment) {
+  const customer = app.customers.find(c => c.id === appointment.customerId);
+  const customerName = customer ? customer.name : 'Unknown Customer';
+  const appointmentTime = new Date(appointment.dateTime);
+  const timeStr = appointmentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  return `
+    <div class="appointment-card">
+      <div class="appointment-time">${timeStr}</div>
+      <div class="appointment-customer">${customerName}</div>
+      <div class="appointment-service">${appointment.service}</div>
+      ${appointment.notes ? `<div class="appointment-notes">${appointment.notes}</div>` : ''}
+      <div class="appointment-actions">
+        <button class="btn btn--sm btn--secondary" onclick="editAppointment('${appointment.id}')">
+          ${translations[app.settings.language].edit}
+        </button>
+        <button class="btn btn--sm btn--outline" onclick="deleteAppointment('${appointment.id}')">
+          ${translations[app.settings.language].delete}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// Customer functions
+function loadCustomers() {
+  const customersList = document.getElementById('customersList');
+  const searchTerm = document.getElementById('customerSearch').value.toLowerCase();
+  
+  let filteredCustomers = app.customers;
+  if (searchTerm) {
+    filteredCustomers = app.customers.filter(customer =>
+      customer.name.toLowerCase().includes(searchTerm) ||
+      customer.phone.includes(searchTerm)
+    );
+  }
+
+  if (filteredCustomers.length === 0) {
+    customersList.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">👥</div>
+        <div class="empty-state-text">${translations[app.settings.language].noCustomers}</div>
+      </div>
+    `;
+  } else {
+    customersList.innerHTML = filteredCustomers
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map(customer => createCustomerCard(customer))
+      .join('');
+  }
+}
+
+function createCustomerCard(customer) {
+  return `
+    <div class="customer-card">
+      <div class="customer-info">
+        <div class="customer-name">${customer.name}</div>
+        <div class="customer-phone">${customer.phone}</div>
+        ${customer.notes ? `<div class="customer-notes">${customer.notes}</div>` : ''}
+      </div>
+      <div class="customer-actions">
+        <button class="btn btn--sm btn--secondary" onclick="editCustomer('${customer.id}')">
+          ${translations[app.settings.language].edit}
+        </button>
+        <button class="btn btn--sm btn--outline" onclick="deleteCustomer('${customer.id}')">
+          ${translations[app.settings.language].delete}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function showCustomerModal(customer = null) {
+  app.editingCustomer = customer;
+  const modal = document.getElementById('customerModal');
+  const title = document.getElementById('customerModalTitle');
+  const form = document.getElementById('customerForm');
+
+  title.textContent = customer ? 
+    translations[app.settings.language].edit + ' ' + translations[app.settings.language].customers.slice(0, -1) :
+    translations[app.settings.language].addCustomer;
+
+  if (customer) {
+    document.getElementById('customerName').value = customer.name;
+    document.getElementById('customerPhone').value = customer.phone;
+    document.getElementById('customerNotes').value = customer.notes || '';
+  } else {
+    form.reset();
+  }
+
+  modal.classList.add('active');
+}
+
+function hideCustomerModal() {
+  document.getElementById('customerModal').classList.remove('active');
+  app.editingCustomer = null;
+}
+
+function saveCustomer() {
+  const name = document.getElementById('customerName').value.trim();
+  const phone = document.getElementById('customerPhone').value.trim();
+  const notes = document.getElementById('customerNotes').value.trim();
+
+  if (!name || !phone) {
+    showToast('Please fill in required fields');
+    return;
+  }
+
+  const customerData = { name, phone, notes };
+
+  if (app.editingCustomer) {
+    app.updateCustomer(app.editingCustomer.id, customerData);
+  } else {
+    app.addCustomer(customerData);
+  }
+
+  hideCustomerModal();
+  loadCustomers();
+  updateAppointmentCustomerSelect();
+  showToast('Customer saved successfully!');
+}
+
+function editCustomer(id) {
+  const customer = app.customers.find(c => c.id === id);
+  if (customer) {
+    hapticFeedback(event.target);
+    showCustomerModal(customer);
+  }
+}
+
+function deleteCustomer(id) {
+  if (confirm('Are you sure you want to delete this customer?')) {
+    hapticFeedback(event.target);
+    app.deleteCustomer(id);
+    loadCustomers();
+    updateAppointmentCustomerSelect();
+    showToast('Customer deleted successfully!');
+  }
+}
+
+// Appointment functions
+function loadAppointments() {
+  const appointmentsList = document.getElementById('appointmentsList');
+  
+  if (app.appointments.length === 0) {
+    appointmentsList.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">📅</div>
+        <div class="empty-state-text">${translations[app.settings.language].noAppointments}</div>
+      </div>
+    `;
+  } else {
+    appointmentsList.innerHTML = app.appointments
+      .sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime))
+      .map(appointment => createFullAppointmentCard(appointment))
+      .join('');
+  }
+}
+
+function createFullAppointmentCard(appointment) {
+  const customer = app.customers.find(c => c.id === appointment.customerId);
+  const customerName = customer ? customer.name : 'Unknown Customer';
+  const appointmentDate = new Date(appointment.dateTime);
+  const dateStr = appointmentDate.toLocaleDateString();
+  const timeStr = appointmentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  return `
+    <div class="appointment-card">
+      <div class="appointment-time">${dateStr} ${timeStr}</div>
+      <div class="appointment-customer">${customerName}</div>
+      <div class="appointment-service">${appointment.service}</div>
+      ${appointment.notes ? `<div class="appointment-notes">${appointment.notes}</div>` : ''}
+      <div class="appointment-actions">
+        <button class="btn btn--sm btn--secondary" onclick="editAppointment('${appointment.id}')">
+          ${translations[app.settings.language].edit}
+        </button>
+        <button class="btn btn--sm btn--outline" onclick="deleteAppointment('${appointment.id}')">
+          ${translations[app.settings.language].delete}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function showAppointmentModal(appointment = null) {
+  app.editingAppointment = appointment;
+  const modal = document.getElementById('appointmentModal');
+  const title = document.getElementById('appointmentModalTitle');
+  const form = document.getElementById('appointmentForm');
+
+  title.textContent = appointment ? 
+    translations[app.settings.language].edit + ' ' + translations[app.settings.language].appointments.slice(0, -1) :
+    translations[app.settings.language].addAppointment;
+
+  updateAppointmentCustomerSelect();
+
+  if (appointment) {
+    document.getElementById('appointmentCustomer').value = appointment.customerId;
+    document.getElementById('appointmentService').value = appointment.service;
+    document.getElementById('appointmentDateTime').value = appointment.dateTime.slice(0, 16);
+    document.getElementById('appointmentNotes').value = appointment.notes || '';
+  } else {
+    form.reset();
+    // Set minimum date to today
+    const now = new Date();
+    const minDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    document.getElementById('appointmentDateTime').min = minDateTime;
+  }
+
+  modal.classList.add('active');
+}
+
+function hideAppointmentModal() {
+  document.getElementById('appointmentModal').classList.remove('active');
+  app.editingAppointment = null;
+}
+
+function updateAppointmentCustomerSelect() {
+  const select = document.getElementById('appointmentCustomer');
+  select.innerHTML = '<option value="">Select a customer...</option>';
+  
+  app.customers
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .forEach(customer => {
+      const option = document.createElement('option');
+      option.value = customer.id;
+      option.textContent = customer.name;
+      select.appendChild(option);
     });
 }
 
-// App State Management
-class AppState {
-    constructor() {
-        this.customers = this.loadData('customers') || [];
-        this.appointments = this.loadData('appointments') || [];
-        this.settings = this.loadData('settings') || {
-            language: 'en',
-            theme: 'auto'
-        };
-        this.currentSection = 'dashboard';
-        this.editingCustomer = null;
-        this.editingAppointment = null;
-        
-        // Initialize with sample data if empty
-        if (this.customers.length === 0) {
-            this.initializeSampleData();
-        }
-    }
+function saveAppointment() {
+  const customerId = document.getElementById('appointmentCustomer').value;
+  const service = document.getElementById('appointmentService').value.trim();
+  const dateTime = document.getElementById('appointmentDateTime').value;
+  const notes = document.getElementById('appointmentNotes').value.trim();
 
-    initializeSampleData() {
-        const sampleCustomers = [
-            {
-                id: 1,
-                name: "John Smith",
-                phone: "+1-555-0123",
-                email: "john.smith@email.com",
-                notes: "Prefers morning appointments",
-                createdAt: "2025-06-01T10:00:00Z"
-            },
-            {
-                id: 2,
-                name: "Maria Papadopoulos",
-                phone: "+30-210-1234567",
-                email: "maria.p@email.com",
-                notes: "Μιλάει ελληνικά",
-                createdAt: "2025-06-02T14:30:00Z"
-            },
-            {
-                id: 3,
-                name: "David Johnson",
-                phone: "+1-555-0456",
-                email: "d.johnson@email.com",
-                notes: "",
-                createdAt: "2025-06-03T09:15:00Z"
-            }
-        ];
+  if (!customerId || !service || !dateTime) {
+    showToast('Please fill in required fields');
+    return;
+  }
 
-        const sampleAppointments = [
-            {
-                id: 1,
-                customerId: 1,
-                date: "2025-06-28",
-                time: "10:00",
-                service: "Consultation",
-                status: "Scheduled",
-                notes: "Initial consultation",
-                createdAt: "2025-06-27T08:00:00Z"
-            },
-            {
-                id: 2,
-                customerId: 2,
-                date: "2025-06-28",
-                time: "14:30",
-                service: "Follow-up",
-                status: "Confirmed",
-                notes: "Follow-up appointment",
-                createdAt: "2025-06-26T16:00:00Z"
-            },
-            {
-                id: 3,
-                customerId: 3,
-                date: "2025-06-29",
-                time: "09:00",
-                service: "Consultation",
-                status: "Scheduled",
-                notes: "",
-                createdAt: "2025-06-27T12:00:00Z"
-            }
-        ];
+  const appointmentData = { customerId, service, dateTime, notes };
 
-        this.customers = sampleCustomers;
-        this.appointments = sampleAppointments;
-        this.saveData('customers', this.customers);
-        this.saveData('appointments', this.appointments);
-    }
+  if (app.editingAppointment) {
+    app.updateAppointment(app.editingAppointment.id, appointmentData);
+  } else {
+    app.addAppointment(appointmentData);
+  }
 
-    loadData(key) {
-        try {
-            const data = localStorage.getItem(`appointmentManager_${key}`);
-            return data ? JSON.parse(data) : null;
-        } catch (error) {
-            console.error(`Error loading ${key}:`, error);
-            return null;
-        }
-    }
-
-    saveData(key, data) {
-        try {
-            localStorage.setItem(`appointmentManager_${key}`, JSON.stringify(data));
-        } catch (error) {
-            console.error(`Error saving ${key}:`, error);
-        }
-    }
-
-    getNextId(type) {
-        const items = type === 'customer' ? this.customers : this.appointments;
-        return items.length > 0 ? Math.max(...items.map(item => item.id)) + 1 : 1;
-    }
+  hideAppointmentModal();
+  loadAppointments();
+  if (app.currentView === 'dashboard') {
+    loadDashboard();
+  }
+  showToast('Appointment saved successfully!');
 }
 
-// Internationalization
-const translations = {
-    en: {
-        appName: "Appointment Manager",
-        dashboard: "Dashboard",
-        customers: "Customers",
-        appointments: "Appointments",
-        settings: "Settings",
-        addCustomer: "Add Customer",
-        addAppointment: "Add Appointment",
-        editCustomer: "Edit Customer",
-        editAppointment: "Edit Appointment",
-        name: "Name",
-        phone: "Phone",
-        email: "Email",
-        notes: "Notes",
-        date: "Date",
-        time: "Time",
-        service: "Service",
-        status: "Status",
-        save: "Save",
-        cancel: "Cancel",
-        edit: "Edit",
-        delete: "Delete",
-        search: "Search",
-        language: "Language",
-        theme: "Theme",
-        light: "Light",
-        dark: "Dark",
-        auto: "Auto",
-        scheduled: "Scheduled",
-        confirmed: "Confirmed",
-        completed: "Completed",
-        cancelled: "Cancelled",
-        consultation: "Consultation",
-        followUp: "Follow-up",
-        treatment: "Treatment",
-        recentAppointments: "Recent Appointments",
-        totalCustomers: "Total Customers",
-        todayAppointments: "Today's Appointments",
-        required: "Required",
-        optional: "Optional",
-        noCustomers: "No customers yet",
-        noAppointments: "No appointments yet",
-        addFirstCustomer: "Add your first customer to get started",
-        addFirstAppointment: "Schedule your first appointment"
-    },
-    el: {
-        appName: "Διαχείριση Ραντεβού",
-        dashboard: "Πίνακας",
-        customers: "Πελάτες",
-        appointments: "Ραντεβού",
-        settings: "Ρυθμίσεις",
-        addCustomer: "Προσθήκη Πελάτη",
-        addAppointment: "Προσθήκη Ραντεβού",
-        editCustomer: "Επεξεργασία Πελάτη",
-        editAppointment: "Επεξεργασία Ραντεβού",
-        name: "Όνομα",
-        phone: "Τηλέφωνο",
-        email: "Email",
-        notes: "Σημειώσεις",
-        date: "Ημερομηνία",
-        time: "Ώρα",
-        service: "Υπηρεσία",
-        status: "Κατάσταση",
-        save: "Αποθήκευση",
-        cancel: "Ακύρωση",
-        edit: "Επεξεργασία",
-        delete: "Διαγραφή",
-        search: "Αναζήτηση",
-        language: "Γλώσσα",
-        theme: "Θέμα",
-        light: "Φωτεινό",
-        dark: "Σκοτεινό",
-        auto: "Αυτόματο",
-        scheduled: "Προγραμματισμένο",
-        confirmed: "Επιβεβαιωμένο",
-        completed: "Ολοκληρωμένο",
-        cancelled: "Ακυρωμένο",
-        consultation: "Συμβουλευτική",
-        followUp: "Παρακολούθηση",
-        treatment: "Θεραπεία",
-        recentAppointments: "Πρόσφατα Ραντεβού",
-        totalCustomers: "Σύνολο Πελατών",
-        todayAppointments: "Σημερινά Ραντεβού",
-        required: "Υποχρεωτικό",
-        optional: "Προαιρετικό",
-        noCustomers: "Δεν υπάρχουν πελάτες ακόμα",
-        noAppointments: "Δεν υπάρχουν ραντεβού ακόμα",
-        addFirstCustomer: "Προσθέστε τον πρώτο σας πελάτη για να ξεκινήσετε",
-        addFirstAppointment: "Προγραμματίστε το πρώτο σας ραντεβού"
-    }
-};
-
-// Haptic Feedback for iOS
-function hapticFeedback(type = 'light') {
-    if ('navigator' in window && 'vibrate' in navigator) {
-        switch (type) {
-            case 'light':
-                navigator.vibrate(10);
-                break;
-            case 'medium':
-                navigator.vibrate(20);
-                break;
-            case 'heavy':
-                navigator.vibrate(50);
-                break;
-            case 'success':
-                navigator.vibrate([10, 50, 10]);
-                break;
-            case 'error':
-                navigator.vibrate([50, 50, 50]);
-                break;
-        }
-    }
+function editAppointment(id) {
+  const appointment = app.appointments.find(a => a.id === id);
+  if (appointment) {
+    hapticFeedback(event.target);
+    showAppointmentModal(appointment);
+  }
 }
 
-// App Controller
-class AppController {
-    constructor() {
-        this.state = new AppState();
-        this.searchTerm = '';
-        this.init();
+function deleteAppointment(id) {
+  if (confirm('Are you sure you want to delete this appointment?')) {
+    hapticFeedback(event.target);
+    app.deleteAppointment(id);
+    loadAppointments();
+    if (app.currentView === 'dashboard') {
+      loadDashboard();
     }
-
-    init() {
-        this.setupEventListeners();
-        this.applyTheme();
-        this.updateLanguage();
-        this.showSection('dashboard');
-        this.updateDashboard();
-        this.hideLoadingScreen();
-    }
-
-    hideLoadingScreen() {
-        setTimeout(() => {
-            const loadingScreen = document.getElementById('loading-screen');
-            const app = document.getElementById('app');
-            loadingScreen.style.opacity = '0';
-            setTimeout(() => {
-                loadingScreen.classList.add('hidden');
-                app.classList.remove('hidden');
-            }, 300);
-        }, 1500);
-    }
-
-    setupEventListeners() {
-        // Navigation
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                hapticFeedback('light');
-                const section = e.currentTarget.dataset.section;
-                this.showSection(section);
-            });
-        });
-
-        // Search
-        document.getElementById('search-btn').addEventListener('click', () => {
-            hapticFeedback('light');
-            this.toggleSearch();
-        });
-
-        document.getElementById('search-close').addEventListener('click', () => {
-            hapticFeedback('light');
-            this.toggleSearch(false);
-        });
-
-        document.getElementById('search-input').addEventListener('input', (e) => {
-            this.searchTerm = e.target.value.toLowerCase();
-            this.renderCurrentSection();
-        });
-
-        // Customer Management
-        document.getElementById('add-customer-btn').addEventListener('click', () => {
-            hapticFeedback('medium');
-            this.showCustomerModal();
-        });
-
-        document.getElementById('customer-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            hapticFeedback('success');
-            this.saveCustomer();
-        });
-
-        // Appointment Management
-        document.getElementById('add-appointment-btn').addEventListener('click', () => {
-            hapticFeedback('medium');
-            this.showAppointmentModal();
-        });
-
-        document.getElementById('appointment-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            hapticFeedback('success');
-            this.saveAppointment();
-        });
-
-        // Modal Management
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    this.closeModal(modal);
-                }
-            });
-        });
-
-        document.querySelectorAll('.modal-close, .modal-cancel').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                hapticFeedback('light');
-                const modal = e.target.closest('.modal');
-                this.closeModal(modal);
-            });
-        });
-
-        // Settings
-        document.getElementById('language-select').addEventListener('change', (e) => {
-            hapticFeedback('light');
-            this.state.settings.language = e.target.value;
-            this.state.saveData('settings', this.state.settings);
-            this.updateLanguage();
-        });
-
-        document.getElementById('theme-select').addEventListener('change', (e) => {
-            hapticFeedback('light');
-            this.state.settings.theme = e.target.value;
-            this.state.saveData('settings', this.state.settings);
-            this.applyTheme();
-        });
-
-        // PWA Install
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            this.showInstallPrompt();
-        });
-    }
-
-    showInstallPrompt() {
-        // Show custom install prompt
-        const notification = document.createElement('div');
-        notification.className = 'update-notification show';
-        notification.innerHTML = 'Install app for better experience';
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            notification.classList.remove('show');
-            setTimeout(() => notification.remove(), 300);
-        }, 5000);
-    }
-
-    translate(key) {
-        return translations[this.state.settings.language][key] || key;
-    }
-
-    updateLanguage() {
-        document.querySelectorAll('[data-i18n]').forEach(element => {
-            const key = element.getAttribute('data-i18n');
-            element.textContent = this.translate(key);
-        });
-
-        // Update document title and loading screen
-        document.title = this.translate('appName');
-        document.getElementById('loading-title').textContent = this.translate('appName');
-
-        // Update language select
-        document.getElementById('language-select').value = this.state.settings.language;
-
-        // Update theme select options
-        const themeSelect = document.getElementById('theme-select');
-        themeSelect.innerHTML = `
-            <option value="auto">${this.translate('auto')}</option>
-            <option value="light">${this.translate('light')}</option>
-            <option value="dark">${this.translate('dark')}</option>
-        `;
-        themeSelect.value = this.state.settings.theme;
-
-        // Update placeholders
-        const searchInput = document.getElementById('search-input');
-        searchInput.placeholder = this.translate('search') + '...';
-
-        // Update service and status options in modals
-        this.updateModalOptions();
-    }
-
-    updateModalOptions() {
-        // Update service options
-        const serviceSelect = document.getElementById('appointment-service');
-        if (serviceSelect) {
-            const currentValue = serviceSelect.value;
-            serviceSelect.innerHTML = `
-                <option value="">Select service...</option>
-                <option value="Consultation">${this.translate('consultation')}</option>
-                <option value="Follow-up">${this.translate('followUp')}</option>
-                <option value="Treatment">${this.translate('treatment')}</option>
-            `;
-            serviceSelect.value = currentValue;
-        }
-
-        // Update status options
-        const statusSelect = document.getElementById('appointment-status');
-        if (statusSelect) {
-            const currentValue = statusSelect.value;
-            statusSelect.innerHTML = `
-                <option value="Scheduled">${this.translate('scheduled')}</option>
-                <option value="Confirmed">${this.translate('confirmed')}</option>
-                <option value="Completed">${this.translate('completed')}</option>
-                <option value="Cancelled">${this.translate('cancelled')}</option>
-            `;
-            statusSelect.value = currentValue;
-        }
-    }
-
-    applyTheme() {
-        const theme = this.state.settings.theme;
-        document.getElementById('theme-select').value = theme;
-
-        if (theme === 'auto') {
-            document.documentElement.removeAttribute('data-color-scheme');
-        } else {
-            document.documentElement.setAttribute('data-color-scheme', theme);
-        }
-    }
-
-    showSection(sectionName) {
-        // Update navigation
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.classList.toggle('active', item.dataset.section === sectionName);
-        });
-
-        // Update sections
-        document.querySelectorAll('.section').forEach(section => {
-            section.classList.toggle('active', section.id === `${sectionName}-section`);
-        });
-
-        // Update header title
-        document.getElementById('page-title').textContent = this.translate(sectionName);
-
-        // Update search button visibility
-        const searchBtn = document.getElementById('search-btn');
-        searchBtn.style.display = ['customers', 'appointments'].includes(sectionName) ? 'block' : 'none';
-
-        this.state.currentSection = sectionName;
-        this.renderCurrentSection();
-    }
-
-    renderCurrentSection() {
-        switch (this.state.currentSection) {
-            case 'dashboard':
-                this.updateDashboard();
-                break;
-            case 'customers':
-                this.renderCustomers();
-                break;
-            case 'appointments':
-                this.renderAppointments();
-                break;
-        }
-    }
-
-    updateDashboard() {
-        // Update stats
-        document.getElementById('total-customers').textContent = this.state.customers.length;
-        
-        const today = new Date().toISOString().split('T')[0];
-        const todayAppointments = this.state.appointments.filter(apt => apt.date === today);
-        document.getElementById('today-appointments').textContent = todayAppointments.length;
-
-        // Update recent appointments
-        const recentAppointments = this.state.appointments
-            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-            .slice(0, 5);
-
-        this.renderAppointmentsList('recent-appointments', recentAppointments);
-    }
-
-    renderCustomers() {
-        let customers = this.state.customers;
-        
-        if (this.searchTerm) {
-            customers = customers.filter(customer =>
-                customer.name.toLowerCase().includes(this.searchTerm) ||
-                customer.phone.toLowerCase().includes(this.searchTerm) ||
-                customer.email.toLowerCase().includes(this.searchTerm)
-            );
-        }
-
-        const container = document.getElementById('customers-list');
-        
-        if (customers.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">👥</div>
-                    <div class="empty-state-text">${this.translate('noCustomers')}</div>
-                    <div class="empty-state-subtext">${this.translate('addFirstCustomer')}</div>
-                </div>
-            `;
-            return;
-        }
-
-        container.innerHTML = customers.map(customer => `
-            <div class="customer-item">
-                <div class="customer-header">
-                    <h3 class="customer-name">${customer.name}</h3>
-                </div>
-                <div class="customer-phone">${customer.phone}</div>
-                ${customer.email ? `<div class="customer-email">${customer.email}</div>` : ''}
-                ${customer.notes ? `<div class="customer-notes">${customer.notes}</div>` : ''}
-                <div class="item-actions">
-                    <button class="btn btn--secondary action-btn" onclick="app.editCustomer(${customer.id})">
-                        ${this.translate('edit')}
-                    </button>
-                    <button class="btn btn--outline action-btn" onclick="app.deleteCustomer(${customer.id})">
-                        ${this.translate('delete')}
-                    </button>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    renderAppointments() {
-        let appointments = this.state.appointments;
-        
-        if (this.searchTerm) {
-            appointments = appointments.filter(appointment => {
-                const customer = this.state.customers.find(c => c.id === appointment.customerId);
-                return customer?.name.toLowerCase().includes(this.searchTerm) ||
-                       appointment.service.toLowerCase().includes(this.searchTerm) ||
-                       appointment.status.toLowerCase().includes(this.searchTerm);
-            });
-        }
-
-        this.renderAppointmentsList('appointments-list', appointments);
-    }
-
-    renderAppointmentsList(containerId, appointments) {
-        const container = document.getElementById(containerId);
-        
-        if (appointments.length === 0) {
-            if (containerId === 'appointments-list') {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📅</div>
-                        <div class="empty-state-text">${this.translate('noAppointments')}</div>
-                        <div class="empty-state-subtext">${this.translate('addFirstAppointment')}</div>
-                    </div>
-                `;
-            } else {
-                container.innerHTML = `<div class="text-center text-muted">${this.translate('noAppointments')}</div>`;
-            }
-            return;
-        }
-
-        appointments.sort((a, b) => {
-            const dateA = new Date(a.date + 'T' + a.time);
-            const dateB = new Date(b.date + 'T' + b.time);
-            return dateB - dateA;
-        });
-
-        container.innerHTML = appointments.map(appointment => {
-            const customer = this.state.customers.find(c => c.id === appointment.customerId);
-            const dateTime = new Date(appointment.date + 'T' + appointment.time);
-            const formattedDate = dateTime.toLocaleDateString(this.state.settings.language === 'el' ? 'el-GR' : 'en-US');
-            const formattedTime = dateTime.toLocaleTimeString(this.state.settings.language === 'el' ? 'el-GR' : 'en-US', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            });
-
-            return `
-                <div class="appointment-item">
-                    <div class="appointment-header">
-                        <h3 class="appointment-customer">${customer?.name || 'Unknown Customer'}</h3>
-                        <span class="appointment-status ${appointment.status.toLowerCase()}">
-                            ${this.translate(appointment.status.toLowerCase())}
-                        </span>
-                    </div>
-                    <div class="appointment-datetime">${formattedDate} • ${formattedTime}</div>
-                    <div class="appointment-service">${this.translate(appointment.service.toLowerCase().replace('-', ''))}</div>
-                    ${appointment.notes ? `<div class="appointment-notes">${appointment.notes}</div>` : ''}
-                    ${containerId === 'appointments-list' ? `
-                        <div class="item-actions">
-                            <button class="btn btn--secondary action-btn" onclick="app.editAppointment(${appointment.id})">
-                                ${this.translate('edit')}
-                            </button>
-                            <button class="btn btn--outline action-btn" onclick="app.deleteAppointment(${appointment.id})">
-                                ${this.translate('delete')}
-                            </button>
-                        </div>
-                    ` : ''}
-                </div>
-            `;
-        }).join('');
-    }
-
-    toggleSearch(show = null) {
-        const searchBar = document.getElementById('search-bar');
-        const searchInput = document.getElementById('search-input');
-        
-        if (show === null) {
-            show = searchBar.classList.contains('hidden');
-        }
-
-        if (show) {
-            searchBar.classList.remove('hidden');
-            searchInput.focus();
-        } else {
-            searchBar.classList.add('hidden');
-            searchInput.value = '';
-            this.searchTerm = '';
-            this.renderCurrentSection();
-        }
-    }
-
-    showCustomerModal(customer = null) {
-        const modal = document.getElementById('customer-modal');
-        const title = document.getElementById('customer-modal-title');
-        const form = document.getElementById('customer-form');
-
-        this.state.editingCustomer = customer;
-
-        if (customer) {
-            title.textContent = this.translate('editCustomer');
-            document.getElementById('customer-name').value = customer.name;
-            document.getElementById('customer-phone').value = customer.phone;
-            document.getElementById('customer-email').value = customer.email || '';
-            document.getElementById('customer-notes').value = customer.notes || '';
-        } else {
-            title.textContent = this.translate('addCustomer');
-            form.reset();
-        }
-
-        this.showModal(modal);
-    }
-
-    showAppointmentModal(appointment = null) {
-        const modal = document.getElementById('appointment-modal');
-        const title = document.getElementById('appointment-modal-title');
-        const form = document.getElementById('appointment-form');
-        const customerSelect = document.getElementById('appointment-customer');
-
-        this.state.editingAppointment = appointment;
-
-        // Populate customer dropdown
-        customerSelect.innerHTML = '<option value="">Select customer...</option>' +
-            this.state.customers.map(customer => 
-                `<option value="${customer.id}">${customer.name}</option>`
-            ).join('');
-
-        // Update modal options with current language
-        this.updateModalOptions();
-
-        if (appointment) {
-            title.textContent = this.translate('editAppointment');
-            document.getElementById('appointment-customer').value = appointment.customerId;
-            document.getElementById('appointment-date').value = appointment.date;
-            document.getElementById('appointment-time').value = appointment.time;
-            document.getElementById('appointment-service').value = appointment.service;
-            document.getElementById('appointment-status').value = appointment.status;
-            document.getElementById('appointment-notes').value = appointment.notes || '';
-        } else {
-            title.textContent = this.translate('addAppointment');
-            form.reset();
-            // Set default date to tomorrow
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            document.getElementById('appointment-date').value = tomorrow.toISOString().split('T')[0];
-        }
-
-        this.showModal(modal);
-    }
-
-    showModal(modal) {
-        modal.classList.add('show');
-        document.body.style.overflow = 'hidden';
-    }
-
-    closeModal(modal) {
-        modal.classList.remove('show');
-        document.body.style.overflow = '';
-        this.state.editingCustomer = null;
-        this.state.editingAppointment = null;
-    }
-
-    saveCustomer() {
-        const name = document.getElementById('customer-name').value.trim();
-        const phone = document.getElementById('customer-phone').value.trim();
-        const email = document.getElementById('customer-email').value.trim();
-        const notes = document.getElementById('customer-notes').value.trim();
-
-        if (!name || !phone) {
-            hapticFeedback('error');
-            return;
-        }
-
-        if (this.state.editingCustomer) {
-            // Update existing customer
-            const customer = this.state.customers.find(c => c.id === this.state.editingCustomer.id);
-            customer.name = name;
-            customer.phone = phone;
-            customer.email = email;
-            customer.notes = notes;
-        } else {
-            // Add new customer
-            const newCustomer = {
-                id: this.state.getNextId('customer'),
-                name,
-                phone,
-                email,
-                notes,
-                createdAt: new Date().toISOString()
-            };
-            this.state.customers.push(newCustomer);
-        }
-
-        this.state.saveData('customers', this.state.customers);
-        this.closeModal(document.getElementById('customer-modal'));
-        this.renderCurrentSection();
-        this.updateDashboard();
-    }
-
-    saveAppointment() {
-        const customerId = parseInt(document.getElementById('appointment-customer').value);
-        const date = document.getElementById('appointment-date').value;
-        const time = document.getElementById('appointment-time').value;
-        const service = document.getElementById('appointment-service').value;
-        const status = document.getElementById('appointment-status').value;
-        const notes = document.getElementById('appointment-notes').value.trim();
-
-        if (!customerId || !date || !time || !service) {
-            hapticFeedback('error');
-            return;
-        }
-
-        if (this.state.editingAppointment) {
-            // Update existing appointment
-            const appointment = this.state.appointments.find(a => a.id === this.state.editingAppointment.id);
-            appointment.customerId = customerId;
-            appointment.date = date;
-            appointment.time = time;
-            appointment.service = service;
-            appointment.status = status;
-            appointment.notes = notes;
-        } else {
-            // Add new appointment
-            const newAppointment = {
-                id: this.state.getNextId('appointment'),
-                customerId,
-                date,
-                time,
-                service,
-                status,
-                notes,
-                createdAt: new Date().toISOString()
-            };
-            this.state.appointments.push(newAppointment);
-        }
-
-        this.state.saveData('appointments', this.state.appointments);
-        this.closeModal(document.getElementById('appointment-modal'));
-        this.renderCurrentSection();
-        this.updateDashboard();
-    }
-
-    editCustomer(id) {
-        hapticFeedback('light');
-        const customer = this.state.customers.find(c => c.id === id);
-        if (customer) {
-            this.showCustomerModal(customer);
-        }
-    }
-
-    deleteCustomer(id) {
-        hapticFeedback('medium');
-        
-        if (confirm('Are you sure you want to delete this customer?')) {
-            // Remove customer
-            this.state.customers = this.state.customers.filter(c => c.id !== id);
-            
-            // Remove associated appointments
-            this.state.appointments = this.state.appointments.filter(a => a.customerId !== id);
-            
-            this.state.saveData('customers', this.state.customers);
-            this.state.saveData('appointments', this.state.appointments);
-            
-            hapticFeedback('success');
-            this.renderCurrentSection();
-            this.updateDashboard();
-        }
-    }
-
-    editAppointment(id) {
-        hapticFeedback('light');
-        const appointment = this.state.appointments.find(a => a.id === id);
-        if (appointment) {
-            this.showAppointmentModal(appointment);
-        }
-    }
-
-    deleteAppointment(id) {
-        hapticFeedback('medium');
-        
-        if (confirm('Are you sure you want to delete this appointment?')) {
-            this.state.appointments = this.state.appointments.filter(a => a.id !== id);
-            this.state.saveData('appointments', this.state.appointments);
-            
-            hapticFeedback('success');
-            this.renderCurrentSection();
-            this.updateDashboard();
-        }
-    }
+    showToast('Appointment deleted successfully!');
+  }
 }
 
-// Initialize app when DOM is loaded
+// Settings functions
+function loadSettings() {
+  document.getElementById('languageSelect').value = app.settings.language;
+  document.getElementById('themeSelect').value = app.settings.theme;
+  updateNotificationButton();
+}
+
+function updateNotificationButton() {
+  const button = document.getElementById('notificationToggle');
+  const span = button.querySelector('span');
+  
+  if (app.settings.notifications) {
+    button.classList.remove('btn--outline');
+    button.classList.add('btn--primary');
+    span.textContent = translations[app.settings.language].enabled;
+  } else {
+    button.classList.remove('btn--primary');
+    button.classList.add('btn--outline');
+    span.textContent = translations[app.settings.language].disabled;
+  }
+}
+
+async function toggleNotifications() {
+  hapticFeedback(event.target);
+  
+  if (!app.settings.notifications) {
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        app.settings.notifications = true;
+        app.notificationPermission = true;
+        app.saveSettings();
+        updateNotificationButton();
+        showToast('Notifications enabled!');
+        
+        // Reschedule all future appointments
+        app.appointments.forEach(appointment => {
+          app.scheduleNotification(appointment);
+        });
+      } else {
+        showToast('Notification permission denied');
+      }
+    } catch (error) {
+      showToast('Notifications not supported');
+    }
+  } else {
+    app.settings.notifications = false;
+    app.saveSettings();
+    updateNotificationButton();
+    showToast('Notifications disabled');
+  }
+}
+
+// Utility functions
+function showToast(message) {
+  const toast = document.getElementById('notificationToast');
+  const messageEl = toast.querySelector('.toast-message');
+  messageEl.textContent = message;
+  
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
+}
+
+// PWA functions
+function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    const swCode = `
+      const CACHE_NAME = 'appointment-manager-v1';
+      const urlsToCache = [
+        '/',
+        '/style.css',
+        '/app.js'
+      ];
+
+      self.addEventListener('install', event => {
+        event.waitUntil(
+          caches.open(CACHE_NAME)
+            .then(cache => cache.addAll(urlsToCache))
+        );
+      });
+
+      self.addEventListener('fetch', event => {
+        event.respondWith(
+          caches.match(event.request)
+            .then(response => response || fetch(event.request))
+        );
+      });
+    `;
+    
+    const blob = new Blob([swCode], { type: 'application/javascript' });
+    const swUrl = URL.createObjectURL(blob);
+    
+    navigator.serviceWorker.register(swUrl)
+      .then(registration => {
+        console.log('Service Worker registered:', registration);
+      })
+      .catch(error => {
+        console.log('Service Worker registration failed:', error);
+      });
+  }
+}
+
+function handleInstallPrompt() {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    app.deferredPrompt = e;
+    showInstallPrompt();
+  });
+}
+
+function showInstallPrompt() {
+  const installPrompt = document.getElementById('installPrompt');
+  installPrompt.classList.remove('hidden');
+  
+  setTimeout(() => {
+    installPrompt.classList.add('hidden');
+  }, 10000); // Hide after 10 seconds
+}
+
+function installApp() {
+  hapticFeedback(event.target);
+  
+  if (app.deferredPrompt) {
+    app.deferredPrompt.prompt();
+    app.deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        showToast('App installed successfully!');
+      }
+      app.deferredPrompt = null;
+      document.getElementById('installPrompt').classList.add('hidden');
+    });
+  }
+}
+
+function dismissInstall() {
+  hapticFeedback(event.target);
+  document.getElementById('installPrompt').classList.add('hidden');
+}
+
+// Event listeners
 document.addEventListener('DOMContentLoaded', () => {
-    window.app = new AppController();
+  // Initialize app
+  updateLanguage();
+  updateTheme();
+  showView('dashboard');
+  registerServiceWorker();
+  handleInstallPrompt();
+
+  // Navigation with debouncing
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      hapticFeedback(e.currentTarget);
+      const view = e.currentTarget.getAttribute('data-view');
+      showView(view);
+    });
+  });
+
+  // Theme toggle with immediate visual feedback
+  document.getElementById('themeToggle').addEventListener('click', (e) => {
+    e.preventDefault();
+    hapticFeedback(e.target);
+    
+    app.settings.theme = app.settings.theme === 'light' ? 'dark' : 'light';
+    app.saveSettings();
+    updateTheme();
+  });
+
+  // Settings
+  document.getElementById('languageSelect').addEventListener('change', (e) => {
+    app.settings.language = e.target.value;
+    app.saveSettings();
+    updateLanguage();
+    loadDashboard();
+    loadCustomers();
+    loadAppointments();
+    updateNotificationButton();
+  });
+
+  document.getElementById('themeSelect').addEventListener('change', (e) => {
+    app.settings.theme = e.target.value;
+    app.saveSettings();
+    updateTheme();
+  });
+
+  document.getElementById('notificationToggle').addEventListener('click', toggleNotifications);
+
+  // Customer modal
+  document.getElementById('addCustomerBtn').addEventListener('click', (e) => {
+    hapticFeedback(e.target);
+    showCustomerModal();
+  });
+  
+  document.getElementById('closeCustomerModal').addEventListener('click', hideCustomerModal);
+  document.getElementById('cancelCustomer').addEventListener('click', hideCustomerModal);
+  document.getElementById('saveCustomer').addEventListener('click', saveCustomer);
+
+  // Appointment modal
+  document.getElementById('addAppointmentBtn').addEventListener('click', (e) => {
+    hapticFeedback(e.target);
+    showAppointmentModal();
+  });
+  
+  document.getElementById('closeAppointmentModal').addEventListener('click', hideAppointmentModal);
+  document.getElementById('cancelAppointment').addEventListener('click', hideAppointmentModal);
+  document.getElementById('saveAppointment').addEventListener('click', saveAppointment);
+
+  // Search
+  document.getElementById('customerSearch').addEventListener('input', loadCustomers);
+
+  // Modal backdrop clicks
+  document.getElementById('customerModal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) {
+      hideCustomerModal();
+    }
+  });
+
+  document.getElementById('appointmentModal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) {
+      hideAppointmentModal();
+    }
+  });
+
+  // PWA install
+  document.getElementById('installBtn').addEventListener('click', installApp);
+  document.getElementById('dismissInstall').addEventListener('click', dismissInstall);
+
+  // Form submissions
+  document.getElementById('customerForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    saveCustomer();
+  });
+
+  document.getElementById('appointmentForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    saveAppointment();
+  });
+
+  // Check notification permission on load
+  if (Notification.permission === 'granted') {
+    app.notificationPermission = true;
+  }
+
+  // Schedule notifications for existing appointments
+  app.appointments.forEach(appointment => {
+    if (app.settings.notifications) {
+      app.scheduleNotification(appointment);
+    }
+  });
 });
 
-// Handle back button for modal closing
-window.addEventListener('popstate', (e) => {
-    const openModal = document.querySelector('.modal.show');
-    if (openModal) {
-        app.closeModal(openModal);
-    }
-});
+// Expose functions to global scope for onclick handlers
+window.editCustomer = editCustomer;
+window.deleteCustomer = deleteCustomer;
+window.editAppointment = editAppointment;
+window.deleteAppointment = deleteAppointment;
