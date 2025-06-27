@@ -2,219 +2,499 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#21808D">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>AppointPro</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQXBwb2ludFBybyIsInNob3J0X25hbWUiOiJBcHBvaW50UHJvIiwic3RhcnRfdXJsIjoiLyIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNGMkYyRjciLCJ0aGVtZV9jb2xvciI6IiMwMDdBRkYiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M00zVXViM0puTHpJd01EQXZjM1puSWlCM2FXUjBhRDBpTWpRaUlHaGxhV2RvZEQwaU1qUWlJSFpwWlhkQ2IzZzlJakFnTUNBeU5DQXlOQ0krUEhKbFkzUWdlRDBpTWlJZ2VUMGlNaUlnZDJsa2RHZzlJakl3SWlCb1pXbG5hSFE5SWpJd0lpQnllRDBpTmlJZ1ptbHNiRDBpSXpBd04wRkdSaUl2UGp3dmMzWm5QZz09Iiwic2l6ZXMiOiIyNHgyNCIsInR5cGUiOiJpbWFnZS9zdmcreG1sIn1dfQ==">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Appointment Manager">
-    <meta name="description" content="Customer and Appointment Management Progressive Web App">
-    
-    <title>Appointment Manager</title>
-    
-    <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQXBwb2ludG1lbnQgTWFuYWdlciBQV0EiLCJzaG9ydF9uYW1lIjoiQXBwb2ludG1lbnRNZ3IiLCJkZXNjcmlwdGlvbiI6IkN1c3RvbWVyIGFuZCBBcHBvaW50bWVudCBNYW5hZ2VtZW50IFByb2dyZXNzaXZlIFdlYiBBcHAiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2ZmZmZmZiIsInRoZW1lX2NvbG9yIjoiIzIxODA4RCIsIm9yaWVudGF0aW9uIjoicG9ydHJhaXQiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sLDxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB3aWR0aD0nMTkyJyBoZWlnaHQ9JzE5Micgdmlld0JveD0nMCAwIDI0IDI0JyBmaWxsPSclMjMyMTk2RjMnPjxwYXRoIGQ9J00xOSAzaC0xVjFoLTJ2Mkg4VjFINnYySDVjLTEuMTEgMC0xLjk5LjktMS45OSAyTDMgMTljMCAxLjEuODkgMiAyIDJoMTRjMS4xIDAgMi0uOSAyLTJWNWMwLTEuMS0uOS0yLTItMnptMCAxNkg1VjhoMTR2MTF6TTcgMTBoNXY1SDd6Jy8+PC9zdmc+Iiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifSx7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCw8c3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgd2lkdGg9JzUxMicgaGVpZ2h0PSc1MTInIHZpZXdCb3g9JzAgMCAyNCAyNCcgZmlsbD0nJTIzMjE5NkYzJz48cGF0aCBkPSdNMTkgM2gtMVYxaC0ydjJIOFYxSDZ2Mkg1Yy0xLjExIDAtMS45OS45LTEuOTkgMkwzIDE5YzAgMS4xLjg5IDIgMiAyaDE0YzEuMSAwIDItLjkgMi0yVjVjMC0xLjEtLjktMi0yLTJ6bTAgMTZINVY4aDE0djExek03IDEwaDV2NUg3eicvPjwvc3ZnPiIsInNpemVzIjoiNTEyeDUxMiIsInR5cGUiOiJpbWFnZS9zdmcreG1sIn1dfQ==">
-    
-    <!-- iPhone-specific meta tags -->
-    <meta name="format-detection" content="telephone=no">
-    <meta name="mobile-web-app-capable" content="yes">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='%2321808D'><path d='M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z'/></svg>">
+    <meta name="theme-color" content="#007AFF">
 </head>
 <body>
-    <div class="app-container">
-        <!-- Header -->
-        <header class="app-header">
-            <h1 class="app-title" data-i18n="appTitle">Appointment Manager</h1>
-            <div class="header-actions">
-                <button class="btn btn--secondary btn--sm theme-toggle" id="themeToggle" aria-label="Toggle theme">
-                    <span class="theme-icon">🌙</span>
+    <!-- Splash Screen -->
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-content">
+            <div class="app-icon">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+            </div>
+            <h1>AppointPro</h1>
+            <p data-translate="loadingApp">Loading your appointments...</p>
+        </div>
+    </div>
+
+    <!-- Onboarding -->
+    <div id="onboarding" class="onboarding hidden">
+        <div class="onboarding-content">
+            <div class="onboard-step" id="step-welcome">
+                <div class="app-icon">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                </div>
+                <h2>Welcome to AppointPro</h2>
+                <p>Your professional appointment and customer management solution</p>
+                <button class="btn btn-primary btn-large" onclick="nextOnboardingStep()">Get Started</button>
+            </div>
+
+            <div class="onboard-step hidden" id="step-language">
+                <h2>Choose Your Language</h2>
+                <p>Select your preferred language</p>
+                <div class="language-options">
+                    <button class="language-btn" onclick="setLanguage('en')">
+                        <span class="flag">🇺🇸</span>
+                        <span>English</span>
+                    </button>
+                    <button class="language-btn" onclick="setLanguage('gr')">
+                        <span class="flag">🇬🇷</span>
+                        <span>Ελληνικά</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="onboard-step hidden" id="step-notifications">
+                <div class="feature-icon">
+                    <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="m13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                </div>
+                <h2>Stay Notified</h2>
+                <p>Get appointment reminders 30 minutes before your scheduled appointments</p>
+                <button class="btn btn-primary btn-large" onclick="requestNotificationPermission()">Enable Notifications</button>
+                <button class="btn btn-secondary" onclick="skipNotifications()">Skip for Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="app hidden">
+        <!-- Navigation Header -->
+        <header class="nav-header">
+            <div class="nav-title">
+                <h1 id="nav-title" data-translate="dashboard">Dashboard</h1>
+            </div>
+            <div class="nav-actions">
+                <button class="nav-btn" id="search-btn" onclick="toggleSearch()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
+                <button class="nav-btn" id="add-btn" onclick="showAddModal()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
                 </button>
             </div>
         </header>
 
-        <!-- Main Content -->
-        <main class="app-main" id="mainContent">
-            <!-- Dashboard View -->
-            <div class="view dashboard-view active" id="dashboardView">
-                <div class="view-header">
-                    <h2 data-i18n="dashboard">Dashboard</h2>
-                </div>
-                <div class="dashboard-content">
+        <!-- Search Bar -->
+        <div id="search-bar" class="search-bar hidden">
+            <div class="search-input-wrapper">
+                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.35-4.35"/>
+                </svg>
+                <input type="text" id="search-input" class="search-input" placeholder="Search..." />
+                <button class="search-cancel" onclick="toggleSearch()">Cancel</button>
+            </div>
+            <div id="search-results" class="search-results hidden"></div>
+        </div>
+
+        <!-- Content Container -->
+        <main class="content-container">
+            <!-- Dashboard Tab -->
+            <div id="tab-dashboard" class="tab-content active">
+                <div class="dashboard-overview">
+                    <div class="today-card">
+                        <h3 data-translate="todaysAppointments">Today's Appointments</h3>
+                        <div class="today-count">
+                            <span id="today-count">0</span>
+                            <small>appointments</small>
+                        </div>
+                    </div>
+                    
                     <div class="stats-grid">
                         <div class="stat-card">
-                            <div class="stat-value" id="todayCount">0</div>
-                            <div class="stat-label" data-i18n="todayAppointments">Today's Appointments</div>
+                            <div class="stat-icon success">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                </svg>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-value" id="monthly-revenue">$0</span>
+                                <span class="stat-label" data-translate="revenue">Revenue</span>
+                            </div>
                         </div>
+                        
                         <div class="stat-card">
-                            <div class="stat-value" id="upcomingCount">0</div>
-                            <div class="stat-label" data-i18n="upcomingAppointments">Upcoming Appointments</div>
+                            <div class="stat-icon primary">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="9" cy="7" r="4"/>
+                                    <path d="m22 21-3-3m1-5a6 6 0 1 0-12 0 6 6 0 0 0 12 0Z"/>
+                                </svg>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-value" id="total-customers">0</span>
+                                <span class="stat-label" data-translate="customers">Customers</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="today-appointments" id="todayAppointments">
-                        <!-- Today's appointments will be populated here -->
+                </div>
+
+                <div class="dashboard-section">
+                    <h3 data-translate="upcomingAppointments">Upcoming Appointments</h3>
+                    <div id="upcoming-appointments" class="appointment-list">
+                        <!-- Appointments will be populated here -->
                     </div>
+                </div>
+
+                <div class="quick-actions">
+                    <button class="quick-action-btn" onclick="showAddCustomerModal()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <line x1="19" y1="8" x2="19" y2="14"/>
+                            <line x1="22" y1="11" x2="16" y2="11"/>
+                        </svg>
+                        <span data-translate="addCustomer">Add Customer</span>
+                    </button>
+                    <button class="quick-action-btn" onclick="showAddAppointmentModal()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                            <line x1="12" y1="14" x2="12" y2="18"/>
+                            <line x1="10" y1="16" x2="14" y2="16"/>
+                        </svg>
+                        <span data-translate="addAppointment">Add Appointment</span>
+                    </button>
                 </div>
             </div>
 
-            <!-- Customers View -->
-            <div class="view customers-view" id="customersView">
-                <div class="view-header">
-                    <h2 data-i18n="customers">Customers</h2>
-                    <button class="btn btn--primary btn--sm" id="addCustomerBtn">
-                        <span data-i18n="addCustomer">Add Customer</span>
-                    </button>
-                </div>
-                <div class="search-container">
-                    <input type="text" class="form-control search-input" id="customerSearch" data-i18n-placeholder="search" placeholder="Search">
-                </div>
-                <div class="customers-list" id="customersList">
+            <!-- Customers Tab -->
+            <div id="tab-customers" class="tab-content">
+                <div id="customers-list" class="customers-list">
                     <!-- Customers will be populated here -->
                 </div>
             </div>
 
-            <!-- Appointments View -->
-            <div class="view appointments-view" id="appointmentsView">
-                <div class="view-header">
-                    <h2 data-i18n="appointments">Appointments</h2>
-                    <button class="btn btn--primary btn--sm" id="addAppointmentBtn">
-                        <span data-i18n="addAppointment">Add Appointment</span>
-                    </button>
+            <!-- Appointments Tab -->
+            <div id="tab-appointments" class="tab-content">
+                <div class="appointments-header">
+                    <div class="view-toggles">
+                        <button class="view-toggle active" data-view="calendar" onclick="switchAppointmentsView('calendar')">Calendar</button>
+                        <button class="view-toggle" data-view="list" onclick="switchAppointmentsView('list')">List</button>
+                    </div>
                 </div>
-                <div class="appointments-list" id="appointmentsList">
-                    <!-- Appointments will be populated here -->
+                
+                <div id="calendar-view" class="calendar-view">
+                    <div class="calendar-header">
+                        <button class="calendar-nav" onclick="changeMonth(-1)">‹</button>
+                        <h3 id="calendar-title">June 2025</h3>
+                        <button class="calendar-nav" onclick="changeMonth(1)">›</button>
+                    </div>
+                    <div class="calendar-grid" id="calendar-grid">
+                        <!-- Calendar will be populated here -->
+                    </div>
+                </div>
+
+                <div id="appointments-list-view" class="appointments-list hidden">
+                    <div id="appointments-list" class="appointments-list">
+                        <!-- Appointments list will be populated here -->
+                    </div>
                 </div>
             </div>
 
-            <!-- Settings View -->
-            <div class="view settings-view" id="settingsView">
-                <div class="view-header">
-                    <h2 data-i18n="settings">Settings</h2>
+            <!-- Finances Tab -->
+            <div id="tab-finances" class="tab-content">
+                <div class="finance-overview">
+                    <div class="finance-cards">
+                        <div class="finance-card income">
+                            <div class="finance-icon success">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="1" x2="12" y2="23"/>
+                                    <path d="m17 5-5 5-5-5"/>
+                                    <path d="m17 13-5 5-5-5"/>
+                                </svg>
+                            </div>
+                            <div class="finance-info">
+                                <span class="finance-value" id="total-income">$0</span>
+                                <span class="finance-label">Income</span>
+                            </div>
+                        </div>
+
+                        <div class="finance-card expense">
+                            <div class="finance-icon error">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="1" x2="12" y2="23"/>
+                                    <path d="m17 5-5 5-5-5"/>
+                                    <path d="m17 13-5 5-5-5"/>
+                                </svg>
+                            </div>
+                            <div class="finance-info">
+                                <span class="finance-value" id="total-expenses">$0</span>
+                                <span class="finance-label" data-translate="expenses">Expenses</span>
+                            </div>
+                        </div>
+
+                        <div class="finance-card profit">
+                            <div class="finance-icon primary">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                </svg>
+                            </div>
+                            <div class="finance-info">
+                                <span class="finance-value" id="total-profit">$0</span>
+                                <span class="finance-label" data-translate="profit">Profit</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="settings-content">
-                    <div class="setting-group">
-                        <label class="form-label" data-i18n="language">Language</label>
-                        <select class="form-control" id="languageSelect">
-                            <option value="en">English</option>
-                            <option value="el">Ελληνικά</option>
-                        </select>
+
+                <div class="finance-actions">
+                    <button class="finance-action-btn" onclick="showAddExpenseModal()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        Add Expense
+                    </button>
+                </div>
+
+                <div class="transactions-section">
+                    <h3>Recent Transactions</h3>
+                    <div id="transactions-list" class="transactions-list">
+                        <!-- Transactions will be populated here -->
                     </div>
-                    <div class="setting-group">
-                        <label class="form-label" data-i18n="theme">Theme</label>
-                        <select class="form-control" id="themeSelect">
-                            <option value="light" data-i18n="light">Light</option>
-                            <option value="dark" data-i18n="dark">Dark</option>
-                        </select>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="tab-settings" class="tab-content">
+                <div class="settings-section">
+                    <h3>Preferences</h3>
+                    <div class="settings-list">
+                        <div class="settings-item">
+                            <div class="settings-info">
+                                <span data-translate="darkMode">Dark Mode</span>
+                                <small>Automatically adapts to system preference</small>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" id="dark-mode-toggle" onchange="toggleDarkMode()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="settings-item">
+                            <div class="settings-info">
+                                <span data-translate="language">Language</span>
+                                <small>Choose your preferred language</small>
+                            </div>
+                            <select id="language-select" class="settings-select" onchange="changeLanguage()">
+                                <option value="en">English</option>
+                                <option value="gr">Ελληνικά</option>
+                            </select>
+                        </div>
+
+                        <div class="settings-item">
+                            <div class="settings-info">
+                                <span data-translate="notifications">Notifications</span>
+                                <small>Appointment reminders</small>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" id="notifications-toggle" onchange="toggleNotifications()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
                     </div>
-                    <div class="setting-group">
-                        <label class="form-label" data-i18n="notifications">Notifications</label>
-                        <button class="btn btn--outline" id="notificationToggle">
-                            <span data-i18n="disabled">Disabled</span>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Data Management</h3>
+                    <div class="settings-actions">
+                        <button class="settings-btn" onclick="exportData()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7,10 12,15 17,10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            Export Data
+                        </button>
+                        <button class="settings-btn" onclick="clearData()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3,6 5,6 21,6"/>
+                                <path d="m19,6v14a2,2 0 0,1-2,2H7a2,2 0 0,1-2-2V6m3,0V4a2,2 0 0,1,2-2h4a2,2 0 0,1,2,2v2"/>
+                            </svg>
+                            Clear All Data
                         </button>
                     </div>
                 </div>
             </div>
         </main>
 
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-            <button class="nav-item active" data-view="dashboard">
-                <span class="nav-icon">📊</span>
-                <span class="nav-label" data-i18n="dashboard">Dashboard</span>
+        <!-- Bottom Tab Bar -->
+        <nav class="tab-bar">
+            <button class="tab-btn active" data-tab="dashboard" onclick="switchTab('dashboard')">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                </svg>
+                <span data-translate="dashboard">Dashboard</span>
             </button>
-            <button class="nav-item" data-view="customers">
-                <span class="nav-icon">👥</span>
-                <span class="nav-label" data-i18n="customers">Customers</span>
+            <button class="tab-btn" data-tab="customers" onclick="switchTab('customers')">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M22 11v6"/>
+                    <path d="M19 14h6"/>
+                </svg>
+                <span data-translate="customers">Customers</span>
             </button>
-            <button class="nav-item" data-view="appointments">
-                <span class="nav-icon">📅</span>
-                <span class="nav-label" data-i18n="appointments">Appointments</span>
+            <button class="tab-btn" data-tab="appointments" onclick="switchTab('appointments')">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                <span data-translate="appointments">Appointments</span>
             </button>
-            <button class="nav-item" data-view="settings">
-                <span class="nav-icon">⚙️</span>
-                <span class="nav-label" data-i18n="settings">Settings</span>
+            <button class="tab-btn" data-tab="finances" onclick="switchTab('finances')">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+                <span data-translate="finances">Finances</span>
+            </button>
+            <button class="tab-btn" data-tab="settings" onclick="switchTab('settings')">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="m12 1 1.68 4.46L18 7l-1.54 4.46L21 13l-4.46 1.68L15 19l-4.46-1.54L9 21l-1.68-4.46L3 15l1.54-4.46L1 9l4.46-1.68L7 3l4.46 1.54L13 1z"/>
+                </svg>
+                <span data-translate="settings">Settings</span>
             </button>
         </nav>
     </div>
 
     <!-- Modals -->
-    <!-- Customer Modal -->
-    <div class="modal" id="customerModal">
-        <div class="modal-content">
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <!-- Add Customer Modal -->
+        <div id="add-customer-modal" class="modal">
             <div class="modal-header">
-                <h3 id="customerModalTitle" data-i18n="addCustomer">Add Customer</h3>
-                <button class="modal-close" id="closeCustomerModal">&times;</button>
+                <h2>Add Customer</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
-            <form class="modal-body" id="customerForm">
+            <form id="add-customer-form" class="modal-content">
                 <div class="form-group">
-                    <label class="form-label" data-i18n="customerName">Customer Name</label>
-                    <input type="text" class="form-control" id="customerName" required>
+                    <label for="customer-name">Name *</label>
+                    <input type="text" id="customer-name" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" data-i18n="phoneNumber">Phone Number</label>
-                    <input type="tel" class="form-control" id="customerPhone" required>
+                    <label for="customer-phone">Phone *</label>
+                    <input type="tel" id="customer-phone" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" data-i18n="notes">Notes</label>
-                    <textarea class="form-control" id="customerNotes" rows="3"></textarea>
+                    <label for="customer-notes">Notes</label>
+                    <textarea id="customer-notes" rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Customer</button>
                 </div>
             </form>
-            <div class="modal-footer">
-                <button type="button" class="btn btn--secondary" id="cancelCustomer" data-i18n="cancel">Cancel</button>
-                <button type="submit" class="btn btn--primary" id="saveCustomer" data-i18n="save">Save</button>
-            </div>
         </div>
-    </div>
 
-    <!-- Appointment Modal -->
-    <div class="modal" id="appointmentModal">
-        <div class="modal-content">
+        <!-- Add Appointment Modal -->
+        <div id="add-appointment-modal" class="modal">
             <div class="modal-header">
-                <h3 id="appointmentModalTitle" data-i18n="addAppointment">Add Appointment</h3>
-                <button class="modal-close" id="closeAppointmentModal">&times;</button>
+                <h2>Add Appointment</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
-            <form class="modal-body" id="appointmentForm">
+            <form id="add-appointment-form" class="modal-content">
                 <div class="form-group">
-                    <label class="form-label" data-i18n="customers">Customer</label>
-                    <select class="form-control" id="appointmentCustomer" required>
-                        <option value="">Select a customer...</option>
+                    <label for="appointment-customer">Customer *</label>
+                    <select id="appointment-customer" required>
+                        <option value="">Select Customer</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" data-i18n="service">Service</label>
-                    <input type="text" class="form-control" id="appointmentService" required>
+                    <label for="appointment-service">Service *</label>
+                    <select id="appointment-service" required>
+                        <option value="">Select Service</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" data-i18n="dateTime">Date & Time</label>
-                    <input type="datetime-local" class="form-control" id="appointmentDateTime" required>
+                    <label for="appointment-date">Date *</label>
+                    <input type="date" id="appointment-date" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" data-i18n="notes">Notes</label>
-                    <textarea class="form-control" id="appointmentNotes" rows="3"></textarea>
+                    <label for="appointment-time">Time *</label>
+                    <input type="time" id="appointment-time" required>
+                </div>
+                <div class="form-group">
+                    <label for="appointment-duration">Duration (minutes)</label>
+                    <input type="number" id="appointment-duration" value="60" min="15" step="15">
+                </div>
+                <div class="form-group">
+                    <label for="appointment-price">Price ($)</label>
+                    <input type="number" id="appointment-price" min="0" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="appointment-notes">Notes</label>
+                    <textarea id="appointment-notes" rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Appointment</button>
                 </div>
             </form>
-            <div class="modal-footer">
-                <button type="button" class="btn btn--secondary" id="cancelAppointment" data-i18n="cancel">Cancel</button>
-                <button type="submit" class="btn btn--primary" id="saveAppointment" data-i18n="save">Save</button>
+        </div>
+
+        <!-- Add Expense Modal -->
+        <div id="add-expense-modal" class="modal">
+            <div class="modal-header">
+                <h2>Add Expense</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
+            <form id="add-expense-form" class="modal-content">
+                <div class="form-group">
+                    <label for="expense-amount">Amount ($) *</label>
+                    <input type="number" id="expense-amount" required min="0" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="expense-category">Category *</label>
+                    <select id="expense-category" required>
+                        <option value="">Select Category</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="expense-description">Description *</label>
+                    <input type="text" id="expense-description" required>
+                </div>
+                <div class="form-group">
+                    <label for="expense-date">Date *</label>
+                    <input type="date" id="expense-date" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Expense</button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <!-- Notification Permission Toast -->
-    <div class="toast" id="notificationToast">
-        <div class="toast-content">
-            <span class="toast-message">Notifications enabled successfully!</span>
-        </div>
-    </div>
-
-    <!-- PWA Install Prompt -->
-    <div class="install-prompt hidden" id="installPrompt">
-        <div class="install-content">
-            <span class="install-text">Install this app on your device for the best experience</span>
-            <button class="btn btn--primary btn--sm" id="installBtn">Install</button>
-            <button class="install-close" id="dismissInstall">&times;</button>
-        </div>
-    </div>
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
 
     <script src="app.js"></script>
 </body>
